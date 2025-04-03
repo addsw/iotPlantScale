@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Received Content</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"></script>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            var socket = io.connect('http://' + document.domain + ':' + location.port);
+            socket.on('new_item', function(data) {
+                var list = document.getElementById('item-list');
+                var existingItem = document.getElementById('item-' + data.id);
+                var parts = data.value.split('\n');
+                var plantInfo = parts[0];
+                var weight = parts[1] || '';
+                var address = parts[2] || '';
+                var reserved = parts[3] || '';
+
+                if (existingItem) {
+                    existingItem.querySelector('a').textContent = plantInfo;
+                    existingItem.querySelector('.extra-info').innerHTML = `${weight}<br>${address}<br>${reserved}`;
+                } else {
+                    var li = document.createElement('li');
+                    li.id = 'item-' + data.id;
+                    var a = document.createElement('a');
+                    a.href = '/details/' + data.id;
+                    a.textContent = plantInfo;
+                    li.appendChild(a);
+                    var extraInfo = document.createElement('div');
+                    extraInfo.className = 'extra-info';
+                    extraInfo.innerHTML = `${weight}<br>${address}<br>${reserved}`;
+                    li.appendChild(extraInfo);
+                    var editBtn = document.createElement('button');
+                    editBtn.textContent = 'Edit';
+                    editBtn.className = 'edit-btn';
+                    editBtn.onclick = function() { toggleEditForm(data.id); };
+                    li.appendChild(editBtn);
+                    list.appendChild(li);
+                }
+            });
+
+            window.toggleEditForm = function(plantId) {
+                var form = document.getElementById('edit-form-' + plantId);
+                if (form) {
+                    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+                } else {
+                    var li = document.getElementById('item-' + plantId);
+                    var form = document.createElement('form');
+                    form.id = 'edit-form-' + plantId;
+                    form.method = 'POST';
+                    form.action = '/details';
+                    form.innerHTML = `
+                        <input type="hidden" name="plantId" value="${plantId}">
+                        <label>Type: <input type="text" name="type" value="${li.querySelector('a').textContent.split(' - ')[1] || ''}"></label><br>
+                        <label>Address: <input type="text" name="address" value="${li.querySelector('.extra-info').textContent.split('Address of Owner: ')[1]?.split('Is the item reserved')[0].trim() || ''}"></label><br>
+                        <label>Availability: 
+                            <select name="reserved">
+                                <option value="false" ${li.querySelector('.extra-info').textContent.includes('Is the item reserved: Available') ? 'selected' : ''}>Available</option>
+                                <option value="true" ${li.querySelector('.extra-info').textContent.includes('Is the item reserved: Reserved') ? 'selected' : ''}>Reserved</option>
+                            </select>
+                        </label><br>
+                        <input type="submit" value="Save">
+                    `;
+                    form.style.display = 'block';
+                    li.appendChild(form);
+                }
+            };
+        });
+    </script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 30px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        ul#item-list {
+            list-style-type: none;
+            padding: 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        ul#item-list li {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        ul#item-list li:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+        ul#item-list li a {
+            color: #2980b9;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        ul#item-list li a:hover {
+            color: #3498db;
+            text-decoration: underline;
+        }
+        .extra-info {
+            display: block;
+            margin-top: 8px;
+            color: #7f8c8d;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+        .edit-btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        .edit-btn:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+        .edit-btn:active {
+            transform: scale(0.95);
+        }
+        .edit-form {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            width: 100%;
+        }
+        .edit-form label {
+            display: block;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 0.9em;
+        }
+        .edit-form input[type="text"],
+        .edit-form select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .edit-form input[type="submit"] {
+            padding: 8px 15px;
+            background-color: #2ecc71;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+        .edit-form input[type="submit"]:hover {
+            background-color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <h1>Received Items</h1>
+    <ul id="item-list">
+        {% if items %}
+            {% for item in items %}
+                <li id="item-{{ item.id }}">
+                    <a href="{{ url_for('details', item_id=item.id) }}">{{ item.value.split('\n')[0] }}</a>
+                    <div class="extra-info">{{ item.value.split('\n')[1]|default('')|safe }}<br>{{ item.value.split('\n')[2]|default('')|safe }}<br>{{ item.value.split('\n')[3]|default('')|safe }}</div>
+                    <button class="edit-btn" onclick="toggleEditForm('{{ item.id }}')">Edit</button>
+                </li>
+            {% endfor %}
+        {% else %}
+            <li>No items received yet</li>
+        {% endif %}
+    </ul>
+</body>
+</html>

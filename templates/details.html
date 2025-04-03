@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plant Details</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 2.2em;
+            margin-bottom: 30px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .plant-details {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 25px;
+            border: none;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .plant-details:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+        .plant-details p {
+            margin: 8px 0;
+            font-size: 1.1em;
+            color: #7f8c8d;
+            line-height: 1.8;
+        }
+        .plant-details p strong {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .plant-details p:first-child {
+            font-size: 1.5em;
+            color: #2980b9;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: background-color 0.3s, transform 0.1s;
+            text-align: center;
+        }
+        .back-btn:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+        .back-btn:active {
+            transform: scale(0.95);
+        }
+        .back-btn-container {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Details for Plant {{ item_id }}</h1>
+    <div class="plant-details">
+        {% set lines = value.split('\n') %}
+        <p>{{ lines[0] }}</p>
+        <p><strong>Weight:</strong> {{ lines[1].split('Weight: ')[1] if lines[1] else 'N/A' }}</p>
+        <p><strong>Address of Owner:</strong> {{ lines[2].split('Address of Owner: ')[1] if lines[2] else 'N/A' }}</p>
+        <p><strong>Availability:</strong> {{ lines[3].split('Is the item reserved?: ')[1] if lines[3] else 'N/A' }}</p>
+    </div>
+    <div class="back-btn-container">
+        <a href="{{ url_for('index') }}" class="back-btn">Back to List</a>
+    </div>
+</body>
+</html>
