@@ -62,19 +62,15 @@ void loop() {
     memcpy(data, &msg, sizeof(msg));
     
     Serial.println("Sending to gateway, weight set to 880g");
-    if (manager.sendtoWait(data, sizeof(msg), GATEWAY_ID)) {
+    unsigned long sendTimeStamp = millis();
+    if (!manager.sendtoWait(data, sizeof(msg), GATEWAY_ID)) {
+      unsigned long ackTimeStamp = millis();
+      unsigned long latency = (ackTimeStamp - sendTimeStamp)/2;
+      Serial.print("Latency: ");
+      Serial.println(latency);
       Serial.println("Gateway send acknowledged");
     } else {
       Serial.println("Gateway send failed");
-    }
-    
-    // --- Broadcast message to Mesh ---
-    strcpy(msg.dest_id, "000"); // "000" used as a broadcast indicator
-    Serial.println("Broadcasting to mesh, weight set to 880g");
-    if (manager.sendto(data, sizeof(msg), RH_BROADCAST_ADDRESS)) {
-      Serial.println("Broadcast sent successfully");
-    } else {
-      Serial.println("Broadcast send failed");
     }
     
     lastSend = now;
