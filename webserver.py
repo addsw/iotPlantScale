@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for
 from flask_socketio import SocketIO, emit
 import paho.mqtt.client as mqtt
 import json
+import base64
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -10,6 +11,18 @@ broker = "localhost"
 topicPlant = "/Plant"
 topicServer = "/Server"
 items = []
+
+ENCRYPT_KEY = 5
+
+def encrypt(text, key):
+    data = text.encode('utf-8')
+    encrypted_data = bytearray()
+
+    for byte in data:
+        encrypted_data.append((byte + key) % 256)
+    
+    encrypted_base64 = base64.b64encode(bytes(encrypted_data)).decode('utf-8')
+    return encrypted_base64
 
 def on_connect(client, userdata, flags, rc):
     print("Connected to MQTT broker with code:", rc)
@@ -129,7 +142,10 @@ def receive_plant_data():
                 'address': address,
                 'reserved': int(plant_reserved)  # Convert to 1/0 for MQTT
             }
-            client.publish(topicServer, json.dumps(updated_data))
+            
+            ciphertext = encrypt(json.dumps(updated_data), ENCRYPT_KEY)
+
+            client.publish(topicServer, ciphertext)
             print(f"Published update to {topicServer}: {updated_data}")
             return redirect(url_for('details', item_id=plant_id))
 

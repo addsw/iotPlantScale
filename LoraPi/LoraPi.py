@@ -4,6 +4,9 @@ import serial
 import json
 import sqlite3
 from time import sleep
+import base64
+
+CRYPT_KEY = 5
 
 @dataclass
 class Plant:
@@ -12,6 +15,18 @@ class Plant:
     type: str = "Unknown"
     address: str = "Unknown"
     reserved: bool = False
+
+def decrypt(text, key):
+    data = base64.b64decode(text)
+
+    decrypted_data = bytearray()
+    
+    for byte in data:
+        decrypted_data.append((byte - key) % 256)
+    
+    # Convert to Base64 encoding (as string)
+    decrypted_text = decrypted_data.decode('utf-8')
+    return decrypted_text
 
 # SQLite3 db
 connection_obj = sqlite3.connect('plant.db')
@@ -61,7 +76,9 @@ def on_message(client, userdata, msg):
     connection_thread = sqlite3.connect('plant.db')
     cursor_thread = connection_thread.cursor()
 
-    data = json.loads(msg.payload.decode("utf-8"))
+    msg_text = decrypt(msg.payload.decode("utf-8"), CRYPT_KEY)
+
+    data = json.loads(msg_text)
     # Todo: update the data parameter
     dbUpdateMqtt(data['plantId'], data['address'], data['type'], data['reserved'], connection_thread, cursor_thread)
     plant = dbReadPlant(data['plantId'], connection_thread, cursor_thread)
