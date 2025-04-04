@@ -11,6 +11,8 @@
 #define NODE_STR_ID "002" // String ID for Node 1
 #define GATEWAY_ID 999    // Gateway Mesh ID
 
+#define CRYPT_KEY 5
+
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 RHMesh manager(rf95, NODE_ID);
 
@@ -20,6 +22,12 @@ struct LoraMessage {
   float weight;
   // char food_type[8];
 } msg;
+
+void encrypt(uint8_t* data, size_t len, int shift) {
+  for (size_t i = 0; i < len; i++) {
+    data[i] = (data[i] + shift) % 256;
+  }
+}
 
 unsigned long lastSend = 0;
 const unsigned long sendInterval = 10000; // Send every 10 seconds
@@ -60,6 +68,8 @@ void loop() {
     msg.weight = 880.0;             
     // strcpy(msg.food_type, "Cheese"); 
     memcpy(data, &msg, sizeof(msg));
+
+    encrypt(data, sizeof(data), CRYPT_KEY);
     
     Serial.println("Sending to gateway, weight set to 880g");
     unsigned long sendTimeStamp = millis();

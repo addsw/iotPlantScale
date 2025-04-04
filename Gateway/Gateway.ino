@@ -7,6 +7,8 @@
 #define RFM95_RST 9
 #define RFM95_INT 2
 
+#define CRYPT_KEY 5
+
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 RHMesh manager(rf95, 999);
 
@@ -16,6 +18,12 @@ struct LoraMessage {
   float weight;
   // char food_type[8];
 };
+
+void decrypt(uint8_t* data, size_t len, int shift) {
+  for (size_t i = 0; i < len; i++) {
+    data[i] = (data[i] - shift) % 256;
+  }
+}
 
 void setup() {
   pinMode(RFM95_RST, OUTPUT);
@@ -44,6 +52,9 @@ void loop() {
   if (manager.available()) {
     if (manager.recvfromAck(buf, &len, &from)) {
       if (len == sizeof(LoraMessage)) {
+        
+        decrypt(buf,sizeof(LoraMessage), CRYPT_KEY);
+
         LoraMessage msg;
         memcpy(&msg, buf, sizeof(msg));
         char weight_str[10];
