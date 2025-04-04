@@ -113,19 +113,17 @@ void loop() {
       encrypt(data, sizeof(data), CRYPT_KEY);
 
       Serial.println("To gateway...");
+      unsigned long sendTimeStamp = millis();
       if (!manager.sendtoWait(data, sizeof(msg), GATEWAY_ID)) {
+        unsigned long ackTimeStamp = millis();
+        unsigned long latency = (ackTimeStamp - sendTimeStamp)/2;
+        Serial.print("Latency: ");
+        Serial.println(latency);
         Serial.println("Gateway OK");
       } else {
         Serial.println("Gateway fail");
       }
 
-      strcpy(msg.dest_id, "000");
-      Serial.println("To mesh...");
-      if (manager.sendto(data, sizeof(msg), RH_BROADCAST_ADDRESS)) {
-        Serial.println("Mesh OK");
-      } else {
-        Serial.println("Mesh fail");
-      }
     } else {
       Serial.println("Scale not ready - skipping publish");
     }

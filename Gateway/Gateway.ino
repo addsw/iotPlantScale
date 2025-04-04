@@ -25,6 +25,31 @@ void decrypt(uint8_t* data, size_t len, int shift) {
   }
 }
 
+bool isValidMessage(LoraMessage msg) {
+  // Check dest_id is "999\0"
+  if (strncmp(msg.dest_id, "999", 4) != 0) {
+    return false;
+  }
+
+  // Validate sender_id: Check up to first null or all 4 bytes if no null
+  int sender_len = 0;
+  for (int i = 0; i < 4; i++) {
+    if (msg.sender_id[i] == '\0') {
+      sender_len = i; // Length up to null
+      break;
+    }
+    if (msg.sender_id[i] < 32 || msg.sender_id[i] > 126) {
+      return false; // Non-printable character
+    }
+    sender_len = i + 1; // No null yet, keep counting
+  }
+  if (sender_len == 0) {
+    return false; // Empty sender_id not allowed
+  }
+
+  return true;
+}
+
 void setup() {
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
@@ -57,6 +82,12 @@ void loop() {
 
         LoraMessage msg;
         memcpy(&msg, buf, sizeof(msg));
+  
+        if(!isValidMessage(msg)){
+          Serial.println("Invalid message received");
+          return;
+        }
+
         char weight_str[10];
         dtostrf(msg.weight, 6, 2, weight_str);
         char json[100];
