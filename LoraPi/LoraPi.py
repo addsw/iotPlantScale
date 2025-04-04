@@ -47,7 +47,8 @@ def dbReadPlant(plantId, dbconnection, dbcursor):
         return None
 
 # MQTT Client Setup
-broker = "172.20.10.2"  # Update with your Pi’s IP
+# broker = "172.20.10.2"  # Update with your Pi’s IP
+broker = "localhost"
 topicPlant = "/Plant"   # Houseplant topic
 topicServer = "/Server" # Server topic
 
