@@ -53,20 +53,20 @@ def on_message(client, userdata, msg):
             plant_reserved = new_reserved if new_reserved is not None else item['reserved']
 
             item.update({
-                'value': f"Plant {plant_id} - {plant_type}\nWeight: {round(plant_weight, 2)} kg\nAddress of Owner: {plant_address}\nIs the item reserved?: {'Reserved' if plant_reserved else 'Available'}",
+                'value': f"Plant {plant_id} - {plant_type}\nWeight: {round(plant_weight, 2)} g\nAddress of Owner: {plant_address}\nIs the item reserved?: {'Reserved' if plant_reserved else 'Available'}",
                 'type': plant_type,
                 'weight': plant_weight,
                 'address': plant_address,
                 'reserved': plant_reserved
             })
-            print(f"Updated via MQTT: Plant {plant_id} to {plant_weight} kg, {plant_type}, {plant_address}, Reserved: {plant_reserved}")
+            print(f"Updated via MQTT: Plant {plant_id} to {plant_weight} g, {plant_type}, {plant_address}, Reserved: {plant_reserved}")
             print(f"Updated value string: {item['value']}")
             socketio.emit('new_item', item)
             return
 
     plant_info = {
         'id': plant_id,
-        'value': f"Plant {plant_id} - {new_type}\nWeight: {round(new_weight, 2)} kg\nAddress of Owner: {new_address or 'Unknown'}\nIs the item reserved?: {'Reserved' if new_reserved else 'Available'}",
+        'value': f"Plant {plant_id} - {new_type}\nWeight: {round(new_weight, 2)} g\nAddress of Owner: {new_address or 'Unknown'}\nIs the item reserved?: {'Reserved' if new_reserved else 'Available'}",
         'type': new_type,
         'weight': new_weight,
         'address': new_address or 'Unknown',
@@ -125,13 +125,13 @@ def receive_plant_data():
             plant_reserved = reserved if new_reserved is not None else item['reserved']
 
             item.update({
-                'value': f"Plant {plant_id} - {plant_type}\nWeight: {round(plant_weight, 2)} kg\nAddress of Owner: {address}\nIs the item reserved?: {'Reserved' if plant_reserved else 'Available'}",
+                'value': f"Plant {plant_id} - {plant_type}\nWeight: {round(plant_weight, 2)} g\nAddress of Owner: {address}\nIs the item reserved?: {'Reserved' if plant_reserved else 'Available'}",
                 'type': plant_type,
                 'weight': plant_weight,
                 'address': address,
                 'reserved': plant_reserved
             })
-            print(f"Updated via Flask: Plant {plant_id} to {plant_weight} kg, {plant_type}, {address}, Reserved: {plant_reserved}")
+            print(f"Updated via Flask: Plant {plant_id} to {plant_weight} g, {plant_type}, {address}, Reserved: {plant_reserved}")
             print(f"Updated value string: {item['value']}")
             socketio.emit('new_item', item)
 
@@ -153,7 +153,7 @@ def receive_plant_data():
         return "Weight and type are required for new plants", 400
     plant_info = {
         'id': plant_id,
-        'value': f"Plant {plant_id} - {new_type}\nWeight: {round(float(new_weight), 2)} kg\nAddress of Owner: {new_address or 'Unknown'}\nIs the item reserved?: {'Reserved' if reserved else 'Available'}",
+        'value': f"Plant {plant_id} - {new_type}\nWeight: {round(float(new_weight), 2)} g\nAddress of Owner: {new_address or 'Unknown'}\nIs the item reserved?: {'Reserved' if reserved else 'Available'}",
         'type': new_type,
         'weight': float(new_weight),
         'address': new_address or 'Unknown',
