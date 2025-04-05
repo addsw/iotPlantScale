@@ -2,7 +2,7 @@
 #include <RHMesh.h>
 #include <RH_RF95.h>
 
-#define RF95_FREQ 915.0
+#define RF95_FREQ 920.0
 #define RFM95_CS 10
 #define RFM95_RST 9
 #define RFM95_INT 2
